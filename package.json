@@ -1,0 +1,26 @@
+{
+    "name": "setfunctions",
+    "version": "0.0.1",
+    "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
+    "synopsis": "Implementation of set functions to encapsulate non-deterministic computations in a strategy independent manner",
+    "category": [ "Programming" ],
+    "license": "BSD-3-Clause",
+    "licenseFile": "LICENSE",
+    "dependencies": {
+        "base"        : ">= 1.0.0, < 2.0.0",
+        "searchtree"  : ">= 1.0.0"
+    },
+    "exportedModules": [ "Control.SetFunctions" ],
+    "compilerCompatibility": {
+        "pakcs": ">= 2.0.0",
+        "kics2": ">= 2.0.0"
+    },
+    "testsuite": {
+        "src-dir": "test",
+        "modules": [ "TestSetFunctions" ]
+    },
+    "source": {
+        "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/setfunctions.git",
+        "tag": "$version"
+    }
+}
