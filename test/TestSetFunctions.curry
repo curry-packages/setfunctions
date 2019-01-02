@@ -5,7 +5,7 @@
 {-# LANGUAGE CPP #-}
 
 import Control.SetFunctions
-import Test.EasyCheck
+import Test.Prop
 
 coin :: Int
 coin = 0 ? 1
