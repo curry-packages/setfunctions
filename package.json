@@ -17,7 +17,7 @@
     },
     "testsuite": {
         "src-dir": "test",
-        "modules": [ "TestSetFunctions" ]
+        "modules": [ "TestSetFunctions", "TestFuncPattern" ]
     },
     "source": {
         "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/setfunctions.git",
