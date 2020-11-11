@@ -65,8 +65,7 @@ module Control.SetFunctions
   , values2list, printValues, sortValues, sortValuesBy
   ) where
 
-import List   ( delete, minimum, minimumBy, maximum, maximumBy )
-import Sort   ( mergeSortBy )
+import Data.List ( delete, minimum, minimumBy, maximum, maximumBy, sortBy )
 #ifdef __PAKCS__
 import Control.Findall
 #else
@@ -390,7 +389,7 @@ values2list s = return (valuesOf s)
 
 --- Prints all elements of a multiset of values.
 printValues :: Show a => Values a -> IO ()
-printValues s = values2list s >>= mapIO_ print
+printValues s = values2list s >>= mapM_ print
 
 --- Transforms a multiset of values into a list sorted by
 --- the standard term ordering. As a consequence, the multiset of values
@@ -404,6 +403,6 @@ sortValues = sortValuesBy (<=)
 --- In order to ensure that the result of this operation is independent of the
 --- evaluation order, the given ordering must be a total order.
 sortValuesBy :: (a -> a -> Bool) -> Values a -> [a]
-sortValuesBy leq s = mergeSortBy leq (valuesOf s)
+sortValuesBy leq s = sortBy leq (valuesOf s)
 
 ------------------------------------------------------------------------

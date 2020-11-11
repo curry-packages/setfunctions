@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 
-import Maybe
+import Data.Maybe
 
 import Control.AllSolutions
 import Control.SetFunctions
@@ -18,7 +18,7 @@ import Test.Prop
 
 --------------------------------------------------------------------------------
 -- define operation last by a function pattern:
-last :: [a] -> a
+last :: Data a => [a] -> a
 last (_++[x]) = x
 
 testLast1 = (last (map (+1) [1..200]))                 -=- 201
@@ -27,7 +27,7 @@ testLast2 = (last (take 10000 (repeat failed) ++ [1])) -=- 1
 
 --------------------------------------------------------------------------------
 -- define a palindrome constraint:
-pali :: [a] -> Bool
+pali :: Data a => [a] -> Bool
 pali (xs ++ reverse xs) = True
 
 testPalindrome1 = always (pali "otto")
@@ -100,6 +100,7 @@ testDutchFlag =
 --------------------------------------------------------------------------------
 -- Some more specific tests:
 
+mkSamePair :: Maybe Int -> (Maybe Int, Maybe Int)
 mkSamePair x = (x,x)
 
 fpair (mkSamePair x) = x
@@ -118,13 +119,14 @@ testJustFailed = failing (isJust justFailed)
 
 data Nat = O | S Nat
 
+g :: Nat -> Nat -> (Nat,Nat)
 g x y = (x,y)
 
 pair (g y y) = True
 
-testPair00 = (pair (0,0)) -=- True
+testPair00 = (pair (O,O)) -=- True
 
-testPair01 = failing (pair (0,1))
+testPair01 = failing (pair (O, S O))
 
 
 -- This call should fail due to an occur check.
@@ -135,7 +137,8 @@ pairCyclic = let x free in pair (x, S x)
 -- This should fail due to strict unification of non-linear patterns:
 testPairFailed = failing (pair (_,failed))
 
-f (g (const 0 y) y) = True
+f :: (Nat,Nat) -> Bool
+f (g (const O y) y) = True
 
 -- This should not fail since the non-linearity does not occur in the
 -- actually evaluated pattern:
@@ -149,6 +152,7 @@ testH = failing (h (_,failed))
 
 -- This call tests whether the implementation is too lazy:
 
+singletonFail :: Int -> [Int]
 singletonFail _ = [failed]
 
 failingPattern (singletonFail x) = True
