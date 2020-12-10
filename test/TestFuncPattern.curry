@@ -53,7 +53,7 @@ simplify :: Exp -> Exp
 simplify (replace c p (evalTo x)) = replace c p x
 
 -- Apply a transformation to some data structure as long as it is defined:
-transformAll :: (a -> a) -> a -> IO a
+transformAll :: Data a => (a -> a) -> a -> IO a
 transformAll trans term =
    (getOneValue (trans term)) >>= maybe (return term) (transformAll trans)
 
