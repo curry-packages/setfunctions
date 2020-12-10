@@ -13,7 +13,6 @@
     "exportedModules": [ "Control.SetFunctions" ],
     "testsuite": {
         "src-dir": "test",
-        "options": "--nosource",
         "modules": [ "TestSetFunctions", "TestFuncPattern" ]
     },
     "source": {
