@@ -10,9 +10,9 @@
 --
 --------------------------------------------------------------------------------
 
-import Data.Maybe
+import Data.Maybe           ( isJust )
 
-import Control.AllSolutions
+import Control.AllValues    ( getAllValues, getOneValue )
 import Control.SetFunctions
 import Test.Prop
 

@@ -46,15 +46,14 @@
 ---    the set functions itself will be evaluated.
 ---
 --- @author Michael Hanus, Fabian Reck
---- @version December 2018
+--- @version June 2021
 ------------------------------------------------------------------------
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_CYMAKE -Wno-incomplete-patterns #-}
 
 module Control.SetFunctions
   (set0, set1, set2, set3, set4, set5, set6, set7
-#ifdef __PAKCS__
-#else
+#ifdef __KICS2__
   , set0With, set1With, set2With, set3With, set4With, set5With, set6With
   , set7With
 #endif
@@ -66,75 +65,13 @@ module Control.SetFunctions
   ) where
 
 import Data.List ( delete, minimum, minimumBy, maximum, maximumBy, sortBy )
-#ifdef __PAKCS__
-import Control.Findall
-#else
+#ifdef __KICS2__
 import Control.SearchTree
+#else
+import Control.AllValues ( allValues, oneValue )
 #endif
 
-#ifdef __PAKCS__
-------------------------------------------------------------------------
---- Combinator to transform a 0-ary function into a corresponding set function.
-set0 :: b -> Values b
-set0 f = Values (oneValue f) (allValues f)
-
---- Combinator to transform a unary function into a corresponding set function.
-set1 :: Data a1 => (a1 -> b) -> a1 -> Values b
-set1 f x | x=:=x = Values (oneValue (f x)) (allValues (f x))
-
---- Combinator to transform a binary function into a corresponding set function.
-set2 :: (Data a1, Data a2) => (a1 -> a2 -> b) -> a1 -> a2 -> Values b
-set2 f x1 x2
-  | x1=:=x1 & x2=:=x2
-  = Values (oneValue (f x1 x2)) (allValues (f x1 x2))
-
---- Combinator to transform a function of arity 3
---- into a corresponding set function.
-set3 :: (Data a1, Data a2, Data a3) =>
-        (a1 -> a2 -> a3 -> b) -> a1 -> a2 -> a3 -> Values b
-set3 f x1 x2 x3
-  | x1=:=x1 & x2=:=x2 & x3=:=x3
-  = Values (oneValue (f x1 x2 x3)) (allValues (f x1 x2 x3))
-
---- Combinator to transform a function of arity 4
---- into a corresponding set function.
-set4 :: (Data a1, Data a2, Data a3, Data a4) =>
-        (a1 -> a2 -> a3 -> a4 -> b) -> a1 -> a2 -> a3 -> a4 -> Values b
-set4 f x1 x2 x3 x4
-  | x1=:=x1 & x2=:=x2 & x3=:=x3 & x4=:=x4
-  = Values (oneValue (f x1 x2 x3 x4)) (allValues (f x1 x2 x3 x4))
-
---- Combinator to transform a function of arity 5
---- into a corresponding set function.
-set5 :: (Data a1, Data a2, Data a3, Data a4, Data a5) =>
-        (a1 -> a2 -> a3 -> a4 -> a5 -> b)
-      -> a1 -> a2 -> a3 -> a4 -> a5 -> Values b
-set5 f x1 x2 x3 x4 x5
-  | x1=:=x1 & x2=:=x2 & x3=:=x3 & x4=:=x4 & x5=:=x5
-  = Values (oneValue (f x1 x2 x3 x4 x5)) (allValues (f x1 x2 x3 x4 x5))
-
---- Combinator to transform a function of arity 6
---- into a corresponding set function.
-set6 :: (Data a1, Data a2, Data a3, Data a4, Data a5, Data a6) =>
-        (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> b)
-      -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> Values b
-set6 f x1 x2 x3 x4 x5 x6
-  | x1=:=x1 & x2=:=x2 & x3=:=x3 & x4=:=x4 & x5=:=x5 & x6=:=x6
-  = Values (oneValue (f x1 x2 x3 x4 x5 x6))
-           (allValues (f x1 x2 x3 x4 x5 x6))
-
---- Combinator to transform a function of arity 7
---- into a corresponding set function.
-set7 :: (Data a1, Data a2, Data a3, Data a4, Data a5, Data a6, Data a7) =>
-        (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> b)
-      -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> Values b
-set7 f x1 x2 x3 x4 x5 x6 x7
-  | x1=:=x1 & x2=:=x2 & x3=:=x3 & x4=:=x4 & x5=:=x5 & x6=:=x6 & x7=:=x7
-  = Values (oneValue (f x1 x2 x3 x4 x5 x6 x7))
-           (allValues (f x1 x2 x3 x4 x5 x6 x7))
-
-------------------------------------------------------------------------
-#else
+#ifdef __KICS2__
 ------------------------------------------------------------------------
 --- Combinator to transform a 0-ary function into a corresponding set function.
 set0 :: b -> Values b
@@ -242,34 +179,95 @@ allVs s f =
 incDepth :: (a -> b) -> a -> b
 incDepth external
 ------------------------------------------------------------------------
+#else
+------------------------------------------------------------------------
+--- Combinator to transform a 0-ary function into a corresponding set function.
+set0 :: b -> Values b
+set0 f = Values (oneValue f) (allValues f)
+
+--- Combinator to transform a unary function into a corresponding set function.
+set1 :: (a1 -> b) -> a1 -> Values b
+set1 f x | isVal x = Values (oneValue (f x)) (allValues (f x))
+
+--- Combinator to transform a binary function into a corresponding set function.
+set2 :: (a1 -> a2 -> b) -> a1 -> a2 -> Values b
+set2 f x1 x2
+  | isVal x1 & isVal x2
+  = Values (oneValue (f x1 x2)) (allValues (f x1 x2))
+
+--- Combinator to transform a function of arity 3
+--- into a corresponding set function.
+set3 :: (a1 -> a2 -> a3 -> b) -> a1 -> a2 -> a3 -> Values b
+set3 f x1 x2 x3
+  | isVal x1 & isVal x2 & isVal x3
+  = Values (oneValue (f x1 x2 x3)) (allValues (f x1 x2 x3))
+
+--- Combinator to transform a function of arity 4
+--- into a corresponding set function.
+set4 :: (a1 -> a2 -> a3 -> a4 -> b) -> a1 -> a2 -> a3 -> a4 -> Values b
+set4 f x1 x2 x3 x4
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4
+  = Values (oneValue (f x1 x2 x3 x4)) (allValues (f x1 x2 x3 x4))
+
+--- Combinator to transform a function of arity 5
+--- into a corresponding set function.
+set5 :: (a1 -> a2 -> a3 -> a4 -> a5 -> b)
+      -> a1 -> a2 -> a3 -> a4 -> a5 -> Values b
+set5 f x1 x2 x3 x4 x5
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5
+  = Values (oneValue (f x1 x2 x3 x4 x5)) (allValues (f x1 x2 x3 x4 x5))
+
+--- Combinator to transform a function of arity 6
+--- into a corresponding set function.
+set6 :: (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> b)
+      -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> Values b
+set6 f x1 x2 x3 x4 x5 x6
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5 & isVal x6
+  = Values (oneValue (f x1 x2 x3 x4 x5 x6))
+           (allValues (f x1 x2 x3 x4 x5 x6))
+
+--- Combinator to transform a function of arity 7
+--- into a corresponding set function.
+set7 :: (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> b)
+      -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> Values b
+set7 f x1 x2 x3 x4 x5 x6 x7
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5 & isVal x6 & isVal x7
+  = Values (oneValue (f x1 x2 x3 x4 x5 x6 x7))
+           (allValues (f x1 x2 x3 x4 x5 x6 x7))
+
+-- Returns `True` after evaluating the argument to a ground value.
+isVal :: a -> Bool
+isVal x = (id $## x) `seq` True
+
+------------------------------------------------------------------------
 #endif
 
 ----------------------------------------------------------------------
 --- Abstract type representing multisets of values.
 
-#ifdef __PAKCS__
-data Values a = Values (Maybe a) [a]
-#else
+#ifdef __KICS2__
 data Values a = Values [a]
+#else
+data Values a = Values (Maybe a) [a]
 #endif
 
 --- Internal operation to extract all elements of a multiset of values.
 valuesOf :: Values a -> [a]
-#ifdef __PAKCS__
-valuesOf (Values _ s) = s
-#else
+#ifdef __KICS2__
 valuesOf (Values s) = s
+#else
+valuesOf (Values _ s) = s
 #endif
 
 ----------------------------------------------------------------------
 
 --- Is a multiset of values empty?
 isEmpty :: Values a -> Bool
-#ifdef __PAKCS__
+#ifdef __KICS2__
+isEmpty (Values vs) = null vs
+#else
 isEmpty (Values firstval _) = case firstval of Nothing -> True
                                                Just _  -> False
-#else
-isEmpty (Values vs) = null vs
 #endif
 
 --- Is a multiset of values not empty?
@@ -290,15 +288,15 @@ valueOf e s = e `elem` valuesOf s
 --- `(set1 chooseValue s)` contains the same elements as the
 --- value set `s`.
 choose :: Eq a => Values a -> (a,Values a)
-#ifdef __PAKCS__
+#ifdef __KICS2__
+choose (Values vs) = (x, Values xs)
+  where x = foldr1 (?) vs
+        xs = delete x vs
+#else
 choose (Values _ vs) =
   (x, Values (if null xs then Nothing else Just (head xs)) xs)
  where x = foldr1 (?) vs
        xs = delete x vs
-#else
-choose (Values vs) = (x, Values xs)
-  where x = foldr1 (?) vs
-        xs = delete x vs
 #endif
 
 --- Chooses (non-deterministically) some value in a multiset of values
@@ -318,11 +316,11 @@ chooseValue s = fst (choose s)
 --- The usage of this operation is only safe (i.e., does not destroy
 --- completeness) if all values in the argument set are identical.
 select :: Values a -> (a,Values a)
-#ifdef __PAKCS__
+#ifdef __KICS2__
+select (Values (x:xs)) = (x, Values xs)
+#else
 select (Values _ (x:xs)) =
   (x, Values (if null xs then Nothing else Just (head xs)) xs)
-#else
-select (Values (x:xs)) = (x, Values xs)
 #endif
 
 --- Selects (indeterministically) some value in a multiset of values
@@ -334,18 +332,18 @@ select (Values (x:xs)) = (x, Values xs)
 --- The usage of this operation is only safe (i.e., does not destroy
 --- completeness) if all values in the argument set are identical.
 selectValue :: Values a -> a
-#ifdef __PAKCS__
-selectValue (Values (Just val) _) = val
-#else
+#ifdef __KICS2__
 selectValue s = fst (select s)
+#else
+selectValue (Values (Just val) _) = val
 #endif
 
 --- Maps a function to all elements of a multiset of values.
 mapValues :: (a -> b) -> Values a -> Values b
-#ifdef __PAKCS__
-mapValues f (Values mbval s) = Values (maybe Nothing (Just . f) mbval) (map f s)
-#else
+#ifdef __KICS2__
 mapValues f (Values s) = Values (map f s)
+#else
+mapValues f (Values mbval s) = Values (maybe Nothing (Just . f) mbval) (map f s)
 #endif
 
 --- Accumulates all elements of a multiset of values by applying a binary
@@ -357,13 +355,13 @@ foldValues f z s = foldr f z (valuesOf s)
 
 --- Keeps all elements of a multiset of values that satisfy a predicate.
 filterValues :: (a -> Bool) -> Values a -> Values a
-#ifdef __PAKCS__
+#ifdef __KICS2__
+filterValues p (Values s) = Values (filter p s)
+#else
 filterValues p (Values _ s) = Values val xs
  where
   xs = filter p s
   val = if null xs then Nothing else Just (head xs)
-#else
-filterValues p (Values s) = Values (filter p s)
 #endif
 
 --- Returns the minimum of a non-empty multiset of values
