@@ -44,9 +44,11 @@
 ---    value will be computed
 --- 3. The arguments of a set function are strictly evaluated before
 ---    the set functions itself will be evaluated.
+--- 4. If the multiset of values contains unbound variables,
+---    the evaluation suspends.
 ---
 --- @author Michael Hanus, Fabian Reck
---- @version June 2021
+--- @version July 2021
 ------------------------------------------------------------------------
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_CYMAKE -Wno-incomplete-patterns #-}
