@@ -265,11 +265,11 @@ valuesOf (Values _ s) = s
 
 --- Is a multiset of values empty?
 isEmpty :: Values a -> Bool
-#ifdef __KICS2__
-isEmpty (Values vs) = null vs
-#else
+#ifdef __PAKCS__
 isEmpty (Values firstval _) = case firstval of Nothing -> True
                                                Just _  -> False
+#else
+isEmpty s = null (valuesOf s)
 #endif
 
 --- Is a multiset of values not empty?
@@ -289,17 +289,15 @@ valueOf e s = e `elem` valuesOf s
 --- then `(set1 chooseValue)` is the identity on value sets, i.e.,
 --- `(set1 chooseValue s)` contains the same elements as the
 --- value set `s`.
-choose :: Eq a => Values a -> (a,Values a)
+choose :: Eq a => Values a -> (a, Values a)
 #ifdef __KICS2__
 choose (Values vs) = (x, Values xs)
-  where x = foldr1 (?) vs
-        xs = delete x vs
 #else
 choose (Values _ vs) =
   (x, Values (if null xs then Nothing else Just (head xs)) xs)
- where x = foldr1 (?) vs
-       xs = delete x vs
 #endif
+ where x  = foldr1 (?) vs
+       xs = delete x vs
 
 --- Chooses (non-deterministically) some value in a multiset of values
 --- and returns the chosen value.
@@ -317,7 +315,7 @@ chooseValue s = fst (choose s)
 --- **NOTE:**
 --- The usage of this operation is only safe (i.e., does not destroy
 --- completeness) if all values in the argument set are identical.
-select :: Values a -> (a,Values a)
+select :: Values a -> (a, Values a)
 #ifdef __KICS2__
 select (Values (x:xs)) = (x, Values xs)
 #else
@@ -334,10 +332,10 @@ select (Values _ (x:xs)) =
 --- The usage of this operation is only safe (i.e., does not destroy
 --- completeness) if all values in the argument set are identical.
 selectValue :: Values a -> a
-#ifdef __KICS2__
-selectValue s = fst (select s)
-#else
+#ifdef __PAKCS__
 selectValue (Values (Just val) _) = val
+#else
+selectValue s = fst (select s)
 #endif
 
 --- Maps a function to all elements of a multiset of values.
