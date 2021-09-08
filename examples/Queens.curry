@@ -11,8 +11,8 @@ queens xs | isEmpty (set2 capture xs ys) = ys where ys = permute xs
 permute :: [a] -> [a]
 permute []     = []
 permute (x:xs) = insX (permute xs)
-  where insX ys     = x : ys
-        insX (y:ys) = y : insX ys
+ where insX ys     = x : ys
+       insX (y:ys) = y : insX ys
 
 capture :: [Int] -> [Int] -> Bool
 capture xs ys

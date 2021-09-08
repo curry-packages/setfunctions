@@ -9,7 +9,7 @@ queens xs | ys =:= permute xs && isEmpty (set2 capture xs ys) = ys where ys free
 permute :: (Data a, Eq a) => [a] -> [a]
 permute []     = []
 permute (x:xs) | u ++ v =:= permute xs  = u ++ [x] ++ v
-  where u,v free
+ where u,v free
 
 capture :: [Int] -> [Int] -> Bool
 capture xs ys
