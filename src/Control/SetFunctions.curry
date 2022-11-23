@@ -51,7 +51,7 @@
 --- @version July 2021
 ------------------------------------------------------------------------
 {-# LANGUAGE CPP #-}
-{-# OPTIONS_CYMAKE -Wno-incomplete-patterns #-}
+{-# OPTIONS_FRONTEND -Wno-incomplete-patterns #-}
 
 module Control.SetFunctions
   (set0, set1, set2, set3, set4, set5, set6, set7
@@ -348,7 +348,7 @@ mapValues f (Values mbval s) = Values (maybe Nothing (Just . f) mbval) (map f s)
 
 --- Accumulates all elements of a multiset of values by applying a binary
 --- operation. This is similarly to fold on lists, but the binary operation
---- must be <b>commutative</b> so that the result is independent of the order
+--- must be **commutative** so that the result is independent of the order
 --- of applying this operation to all elements in the multiset.
 foldValues :: (a -> a -> a) -> a -> Values a -> a
 foldValues f z s = foldr f z (valuesOf s)
