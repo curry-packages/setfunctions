@@ -5,8 +5,9 @@
 --- > S. Antoy, M. Hanus: Set Functions for Functional Logic Programming
 --- > Proc. 11th International Conference on Principles and Practice
 --- > of Declarative Programming (PPDP'09), pp. 73-82, ACM Press, 2009
----
---- Intuition: If `f` is an n-ary function, then `(setn f)` is a set-valued
+--- 
+--- The general concept of set functions is as follows.
+--- If `f` is an n-ary function, then `(setn f)` is a set-valued
 --- function that collects all non-determinism caused by f (but not
 --- the non-determinism caused by evaluating arguments!) in a set.
 --- Thus, `(setn f a1 ... an)` returns the set of all
@@ -18,7 +19,20 @@
 --- Similarly, logical variables occuring in `a1`,...,`an` are not bound
 --- inside this capsule (in PAKCS they cause a suspension until
 --- they are bound).
----
+--- 
+--- *Remark:*
+--- Since there is no special syntax for set functions,
+--- one has to write `(setn f)` for the set function of the
+--- _n-ary top-level function_ `f`.
+--- The correct usage of set functions is currently not checked by
+--- the compiler, i.e., one can also write unintended uses
+--- like `set0 ((+1) (1 ? 2))`.
+--- In order to check the correct use of set functions,
+--- it is recommended to apply the tool
+--- [CurryCheck](https://www-ps.informatik.uni-kiel.de/~cpm/pkgs/currycheck.html)
+--- on Curry programs which reports illegal uses of set functions
+--- (among other properties).
+--- 
 --- The set of values returned by a set function is represented
 --- by an abstract type 'Values' on which several operations are
 --- defined in this module. Actually, it is a multiset of values,
@@ -33,22 +47,29 @@
 --- > A Semantics for Weakly Encapsulated Search in Functional Logic Programs
 --- > Proc. 15th International Conference on Principles and Practice
 --- > of Declarative Programming (PPDP'13), pp. 49-60, ACM Press, 2013
----
---- Restrictions of the PAKCS implementation of set functions:
 --- 
---- 1. The set is a multiset, i.e., it might contain multiple values.
---- 2. The multiset of values is completely evaluated when demanded.
+--- Note that the implementation of this library uses multisets
+--- instead of sets. Thus, the result of a set function might
+--- contain multiple values. From a declarative point of view,
+--- this is not relevant. It has the advantage that equality
+--- is not required on values, i.e., encapsulated values can also
+--- be functional.
+--- 
+--- The PAKCS implementation of set functions has several restrictions,
+--- in particular:
+--- 
+--- 1. The multiset of values is completely evaluated when demanded.
 ---    Thus, if it is infinite, its evaluation will not terminate
 ---    even if only some elements (e.g., for a containment test)
 ---    are demanded. However, for the emptiness test, at most one
 ---    value will be computed
---- 3. The arguments of a set function are strictly evaluated before
+--- 2. The arguments of a set function are strictly evaluated before
 ---    the set functions itself will be evaluated.
---- 4. If the multiset of values contains unbound variables,
+--- 3. If the multiset of values contains unbound variables,
 ---    the evaluation suspends.
 ---
 --- @author Michael Hanus, Fabian Reck
---- @version July 2021
+--- @version November 2022
 ------------------------------------------------------------------------
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_FRONTEND -Wno-incomplete-patterns #-}
@@ -60,7 +81,7 @@ module Control.SetFunctions
   , set7With
 #endif
   , Values, isEmpty, notEmpty, valueOf
-  , choose, chooseValue, select, selectValue
+  , chooseValue, choose, selectValue, select, getSomeValue, getSome
   , mapValues, foldValues, filterValues
   , minValue, minValueBy, maxValue, maxValueBy
   , values2list, printValues, sortValues, sortValuesBy
@@ -248,8 +269,14 @@ isVal x = (id $## x) `seq` True
 --- Abstract type representing multisets of values.
 
 #ifdef __KICS2__
+-- In KiCS2, values are represented as (possibly infinite) lists.
 data Values a = Values [a]
 #else
+-- In PAKCS, values are represented as lists but the first argument
+-- is used if values are tested for emptiness of a single value
+-- is selected. This has the advantage that one can deal with infinite
+-- search spaces as long as one is only interested in an emptiness
+-- test or a single value.
 data Values a = Values (Maybe a) [a]
 #endif
 
@@ -281,8 +308,21 @@ valueOf :: Eq a => a -> Values a -> Bool
 valueOf e s = e `elem` valuesOf s
 
 --- Chooses (non-deterministically) some value in a multiset of values
+--- and returns the chosen value. For instance, the expression
+---
+---     chooseValue (set1 anyOf [1,2,3])
+---
+--- non-deterministically evaluates to the values `1`, `2`, and `3`.
+
+--- Thus, `(set1 chooseValue)` is the identity on value sets, i.e.,
+--- `(set1 chooseValue s)` contains the same elements as the
+--- value set `s`.
+chooseValue :: Eq a => Values a -> a
+chooseValue s = fst (choose s)
+
+--- Chooses (non-deterministically) some value in a multiset of values
 --- and returns the chosen value and the remaining multiset of values.
---- Thus, if we consider the operation `chooseValue` by
+--- Thus, if we consider the operation `chooseValue` defined by
 ---
 ---     chooseValue x = fst (choose x)
 ---
@@ -299,17 +339,26 @@ choose (Values _ vs) =
  where x  = foldr1 (?) vs
        xs = delete x vs
 
---- Chooses (non-deterministically) some value in a multiset of values
---- and returns the chosen value.
---- Thus, `(set1 chooseValue)` is the identity on value sets, i.e.,
---- `(set1 chooseValue s)` contains the same elements as the
---- value set `s`.
-chooseValue :: Eq a => Values a -> a
-chooseValue s = fst (choose s)
+--- Selects (indeterministically) some value in a multiset of values
+--- and returns the selected value.
+--- Thus, `selectValue` has always at most one value, i.e., it is
+--- a deterministic operation.
+--- It fails if the value set is empty.
+---
+--- **NOTE:**
+--- The usage of this operation is only safe (i.e., does not destroy
+--- completeness) if all values in the argument set are identical.
+selectValue :: Values a -> a
+#ifdef __PAKCS__
+selectValue (Values (Just val) _) = val
+#else
+selectValue s = fst (select s)
+#endif
 
 --- Selects (indeterministically) some value in a multiset of values
 --- and returns the selected value and the remaining multiset of values.
---- Thus, `select` has always at most one value.
+--- Thus, `select` has always at most one value, i.e., it is
+--- a deterministic operation.
 --- It fails if the value set is empty.
 ---
 --- **NOTE:**
@@ -323,19 +372,28 @@ select (Values _ (x:xs)) =
   (x, Values (if null xs then Nothing else Just (head xs)) xs)
 #endif
 
---- Selects (indeterministically) some value in a multiset of values
---- and returns the selected value.
---- Thus, `selectValue` has always at most one value.
---- It fails if the value set is empty.
----
---- **NOTE:**
---- The usage of this operation is only safe (i.e., does not destroy
---- completeness) if all values in the argument set are identical.
-selectValue :: Values a -> a
-#ifdef __PAKCS__
-selectValue (Values (Just val) _) = val
+--- Returns (indeterministically) some value in a multiset of values.
+--- If the value set is empty, `Nothing` is returned.
+getSomeValue :: Values a -> IO (Maybe a)
+#ifdef __KICS2__
+getSomeValue (Values [])    = return Nothing
+getSomeValue (Values (x:_)) = return (Just x)
 #else
-selectValue s = fst (select s)
+getSomeValue (Values mbval _) = return mbval
+#endif
+
+--- Selects (indeterministically) some value in a multiset of values
+--- and returns the selected value and the remaining multiset of values.
+--- Thus, `select` has always at most one value.
+--- If the value set is empty, `Nothing` is returned.
+getSome :: Values a -> IO (Maybe (a, Values a))
+#ifdef __KICS2__
+getSome (Values [])     = return Nothing
+getSome (Values (x:xs)) = return (Just (x, Values xs))
+#else
+getSome (Values _ [])     = return Nothing
+getSome (Values _ (x:xs)) =
+  return (Just (x, Values (if null xs then Nothing else Just (head xs)) xs))
 #endif
 
 --- Maps a function to all elements of a multiset of values.
