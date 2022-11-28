@@ -94,38 +94,52 @@ import Control.SearchTree
 import Control.AllValues ( allValues, oneValue )
 #endif
 
-#ifdef __KICS2__
 ------------------------------------------------------------------------
 --- Combinator to transform a 0-ary function into a corresponding set function.
 set0 :: b -> Values b
+#ifdef __KICS2__
 set0 f = set0With dfsStrategy f
 
 --- Combinator to transform a 0-ary function into a corresponding set function
 --- that uses a given strategy to compute its values.
 set0With :: Strategy b -> b -> Values b
 set0With s f = Values (vsToList (s (someSearchTree f)))
+#else
+set0 f = Values (oneValue f) (allValues f)
+#endif
 
 --- Combinator to transform a unary function into a corresponding set function.
 set1 :: (a1 -> b) -> a1 -> Values b
+#ifdef __KICS2__
 set1 f x = set1With dfsStrategy f x
 
 --- Combinator to transform a unary function into a corresponding set function
 --- that uses a given strategy to compute its values.
 set1With :: Strategy b -> (a1 -> b) -> a1 -> Values b
 set1With s f x = allVs s (\_ -> f x)
+#else
+set1 f x | isVal x = Values (oneValue (f x)) (allValues (f x))
+#endif
 
 --- Combinator to transform a binary function into a corresponding set function.
 set2 :: (a1 -> a2 -> b) -> a1 -> a2 -> Values b
+#ifdef __KICS2__
 set2 f x1 x2 = set2With dfsStrategy f x1 x2
 
 --- Combinator to transform a binary function into a corresponding set function
 --- that uses a given strategy to compute its values.
 set2With :: Strategy b -> (a1 -> a2 -> b) -> a1 -> a2 -> Values b
 set2With s f x1 x2 = allVs s (\_ -> f x1 x2)
+#else
+set2 f x1 x2
+  | isVal x1 & isVal x2
+  = Values (oneValue (f x1 x2)) (allValues (f x1 x2))
+#endif
 
 --- Combinator to transform a function of arity 3
 --- into a corresponding set function.
 set3 :: (a1 -> a2 -> a3 -> b) -> a1 -> a2 -> a3 -> Values b
+#ifdef __KICS2__
 set3 f x1 x2 x3 = set3With dfsStrategy f x1 x2 x3
 
 --- Combinator to transform a function of arity 3
@@ -133,10 +147,16 @@ set3 f x1 x2 x3 = set3With dfsStrategy f x1 x2 x3
 --- that uses a given strategy to compute its values.
 set3With :: Strategy b -> (a1 -> a2 -> a3 -> b) -> a1 -> a2 -> a3 -> Values b
 set3With s f x1 x2 x3 = allVs s (\_ -> f  x1 x2 x3)
+#else
+set3 f x1 x2 x3
+  | isVal x1 & isVal x2 & isVal x3
+  = Values (oneValue (f x1 x2 x3)) (allValues (f x1 x2 x3))
+#endif
 
 --- Combinator to transform a function of arity 4
 --- into a corresponding set function.
 set4 :: (a1 -> a2 -> a3 -> a4 -> b) -> a1 -> a2 -> a3 -> a4 -> Values b
+#ifdef __KICS2__
 set4 f x1 x2 x3 x4 = set4With dfsStrategy f x1 x2 x3 x4
 
 --- Combinator to transform a function of arity 4
@@ -145,11 +165,17 @@ set4 f x1 x2 x3 x4 = set4With dfsStrategy f x1 x2 x3 x4
 set4With :: Strategy b -> (a1 -> a2 -> a3 -> a4 -> b) -> a1 -> a2 -> a3 -> a4
          -> Values b
 set4With s f x1 x2 x3 x4 = allVs s (\_ -> f x1 x2 x3 x4)
+#else
+set4 f x1 x2 x3 x4
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4
+  = Values (oneValue (f x1 x2 x3 x4)) (allValues (f x1 x2 x3 x4))
+#endif
 
 --- Combinator to transform a function of arity 5
 --- into a corresponding set function.
 set5 :: (a1 -> a2 -> a3 -> a4 -> a5 -> b)
       -> a1 -> a2 -> a3 -> a4 -> a5 -> Values b
+#ifdef __KICS2__
 set5 f x1 x2 x3 x4 x5 = set5With dfsStrategy f x1 x2 x3 x4 x5
 
 --- Combinator to transform a function of arity 5
@@ -158,11 +184,17 @@ set5 f x1 x2 x3 x4 x5 = set5With dfsStrategy f x1 x2 x3 x4 x5
 set5With :: Strategy b -> (a1 -> a2 -> a3 -> a4 -> a5 -> b)
          -> a1 -> a2 -> a3 -> a4 -> a5 -> Values b
 set5With s f x1 x2 x3 x4 x5 = allVs s (\_ -> f x1 x2 x3 x4 x5)
+#else
+set5 f x1 x2 x3 x4 x5
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5
+  = Values (oneValue (f x1 x2 x3 x4 x5)) (allValues (f x1 x2 x3 x4 x5))
+#endif
 
 --- Combinator to transform a function of arity 6
 --- into a corresponding set function.
 set6 :: (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> b)
       -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> Values b
+#ifdef __KICS2__
 set6 f x1 x2 x3 x4 x5 x6 = set6With dfsStrategy f x1 x2 x3 x4 x5 x6
 
 --- Combinator to transform a function of arity 6
@@ -172,11 +204,18 @@ set6With :: Strategy b -> (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> b)
          -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> Values b
 set6With s f x1 x2 x3 x4 x5 x6 =
  allVs s (\_ -> f x1 x2 x3 x4 x5 x6)
+#else
+set6 f x1 x2 x3 x4 x5 x6
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5 & isVal x6
+  = Values (oneValue (f x1 x2 x3 x4 x5 x6))
+           (allValues (f x1 x2 x3 x4 x5 x6))
+#endif
 
 --- Combinator to transform a function of arity 7
 --- into a corresponding set function.
 set7 :: (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> b)
       -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> Values b
+#ifdef __KICS2__
 set7 f x1 x2 x3 x4 x5 x6 x7 = set7With dfsStrategy f x1 x2 x3 x4 x5 x6 x7
 
 --- Combinator to transform a function of arity 7
@@ -186,10 +225,17 @@ set7With :: Strategy b -> (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> b)
          -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> Values b
 set7With s f x1 x2 x3 x4 x5 x6 x7 =
  allVs s (\_ -> f x1 x2 x3 x4 x5 x6 x7)
+#else
+set7 f x1 x2 x3 x4 x5 x6 x7
+  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5 & isVal x6 & isVal x7
+  = Values (oneValue (f x1 x2 x3 x4 x5 x6 x7))
+           (allValues (f x1 x2 x3 x4 x5 x6 x7))
+#endif
 
 ------------------------------------------------------------------------
 -- Auxiliaries:
 
+#ifdef __KICS2__
 -- Collect all values of an expression (represented as a constant function)
 -- in a list:
 allVs :: Strategy a -> (() -> a) -> Values a
@@ -201,71 +247,15 @@ allVs s f =
 -- argument is incremented.
 incDepth :: (a -> b) -> a -> b
 incDepth external
-------------------------------------------------------------------------
+
 #else
-------------------------------------------------------------------------
---- Combinator to transform a 0-ary function into a corresponding set function.
-set0 :: b -> Values b
-set0 f = Values (oneValue f) (allValues f)
-
---- Combinator to transform a unary function into a corresponding set function.
-set1 :: (a1 -> b) -> a1 -> Values b
-set1 f x | isVal x = Values (oneValue (f x)) (allValues (f x))
-
---- Combinator to transform a binary function into a corresponding set function.
-set2 :: (a1 -> a2 -> b) -> a1 -> a2 -> Values b
-set2 f x1 x2
-  | isVal x1 & isVal x2
-  = Values (oneValue (f x1 x2)) (allValues (f x1 x2))
-
---- Combinator to transform a function of arity 3
---- into a corresponding set function.
-set3 :: (a1 -> a2 -> a3 -> b) -> a1 -> a2 -> a3 -> Values b
-set3 f x1 x2 x3
-  | isVal x1 & isVal x2 & isVal x3
-  = Values (oneValue (f x1 x2 x3)) (allValues (f x1 x2 x3))
-
---- Combinator to transform a function of arity 4
---- into a corresponding set function.
-set4 :: (a1 -> a2 -> a3 -> a4 -> b) -> a1 -> a2 -> a3 -> a4 -> Values b
-set4 f x1 x2 x3 x4
-  | isVal x1 & isVal x2 & isVal x3 & isVal x4
-  = Values (oneValue (f x1 x2 x3 x4)) (allValues (f x1 x2 x3 x4))
-
---- Combinator to transform a function of arity 5
---- into a corresponding set function.
-set5 :: (a1 -> a2 -> a3 -> a4 -> a5 -> b)
-      -> a1 -> a2 -> a3 -> a4 -> a5 -> Values b
-set5 f x1 x2 x3 x4 x5
-  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5
-  = Values (oneValue (f x1 x2 x3 x4 x5)) (allValues (f x1 x2 x3 x4 x5))
-
---- Combinator to transform a function of arity 6
---- into a corresponding set function.
-set6 :: (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> b)
-      -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> Values b
-set6 f x1 x2 x3 x4 x5 x6
-  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5 & isVal x6
-  = Values (oneValue (f x1 x2 x3 x4 x5 x6))
-           (allValues (f x1 x2 x3 x4 x5 x6))
-
---- Combinator to transform a function of arity 7
---- into a corresponding set function.
-set7 :: (a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> b)
-      -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> Values b
-set7 f x1 x2 x3 x4 x5 x6 x7
-  | isVal x1 & isVal x2 & isVal x3 & isVal x4 & isVal x5 & isVal x6 & isVal x7
-  = Values (oneValue (f x1 x2 x3 x4 x5 x6 x7))
-           (allValues (f x1 x2 x3 x4 x5 x6 x7))
-
 -- Returns `True` after evaluating the argument to a ground value.
 isVal :: a -> Bool
 isVal x = (id $## x) `seq` True
 
-------------------------------------------------------------------------
 #endif
 
-----------------------------------------------------------------------
+------------------------------------------------------------------------
 --- Abstract type representing multisets of values.
 
 #ifdef __KICS2__
