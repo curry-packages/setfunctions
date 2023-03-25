@@ -29,7 +29,7 @@
 --- like `set0 ((+1) (1 ? 2))`.
 --- In order to check the correct use of set functions,
 --- it is recommended to apply the tool
---- [CurryCheck](https://www-ps.informatik.uni-kiel.de/~cpm/pkgs/currycheck.html)
+--- [CurryCheck](https://cpm.informatik.uni-kiel.de/pkgs/currycheck.html)
 --- on Curry programs which reports illegal uses of set functions
 --- (among other properties).
 --- 
