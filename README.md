@@ -31,7 +31,7 @@ the compiler, i.e., one can also write unintended uses
 like `set0 ((+1) (1 ? 2))`.
 In order to check the correct use of set functions,
 it is recommended to apply the tool
-[CurryCheck](https://cpm.informatik.uni-kiel.de/pkgs/currycheck.html)
+[CurryCheck](https://cpm.curry-lang.org/pkgs/currycheck.html)
 on Curry programs which reports illegal uses of set functions
 (among other properties).
 
