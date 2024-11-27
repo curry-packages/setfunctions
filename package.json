@@ -3,7 +3,7 @@
     "version": "3.0.0",
     "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
     "synopsis": "Implementation of set functions to encapsulate non-deterministic computations in a strategy independent manner",
-    "category": [ "Logic", "Programming" ],
+    "category": [ "Logic", "Programming", "Control" ],
     "license": "BSD-3-Clause",
     "licenseFile": "LICENSE",
     "dependencies": {

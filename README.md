@@ -71,3 +71,10 @@ in particular:
    the evaluation suspends.
 
 --------------------------------------------------------------------------
+
+Note that the functionality of this package is largely contained
+in the modules `Control.Search/...` of the
+[base package](https://cpm.curry-lang.org/pkgs/base.html)
+since version 3.3.0, which is part of newer Curry distributions.
+
+--------------------------------------------------------------------------
