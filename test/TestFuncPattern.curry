@@ -1,4 +1,4 @@
----------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 -- Some tests for functional patterns (involving also features for
 -- encapsulated search) as described in:
 --
@@ -6,9 +6,9 @@
 -- Declarative Programming with Function Patterns
 -- Proceedings of the International Symposium on Logic-based Program Synthesis
 -- and Transformation (LOPSTR'05), appeared in Springer LNCS 3901, 2006
--- http://www.informatik.uni-kiel.de/~mh/papers/LOPSTR05.html
+-- https://doi.org/10.1007/11680093_2
 --
---------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 import Data.Maybe           ( isJust )
 
